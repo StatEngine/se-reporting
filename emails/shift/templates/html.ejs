@@ -1,0 +1,285 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Title</title>
+    <link rel="stylesheet" href="combined.min.css" />
+  </head>
+
+  <body>
+
+    <% const showDistance = !isNaN(payload.result.apparatusDistancePercentile90); %>
+    <% const showBattalionSummary = !locals.sections || (locals.sections && locals.sections.battalionSummary !== false) || (locals.sections && locals.sections.battalionSummary && locals.sections.battalionSummary.enabled !== false); %>
+    <% const showUnitSummary = !locals.sections || (locals.sections && locals.sections.unitSummary !== false) || (locals.sections && locals.sections.unitSummary && locals.sections.unitSummary.enabled !== false); %>
+    <% const showIncidentTypeSummary = !locals.sections || (locals.sections && locals.sections.showIncidentTypeSummary !== false) || (locals.sections && locals.sections.showIncidentTypeSummary && locals.sections.showIncidentTypeSummary.enabled !== false); %>
+    <% const showTransports = locals.sections && showUnitSummary && ( typeof(locals.sections.unitSummary) === "object" && locals.sections.unitSummary.showTransports === true); %>
+    <% const showLocationSummary = !locals.sections || (locals.sections && locals.sections.showLocationSummary !== false) || (locals.sections && locals.sections.showLocationSummary && locals.sections.showLocationSummary.enabled !== false); %>
+
+    <% const customDepartmentIcon = locals.icon || 'https://s3.amazonaws.com/statengine-public-assets/statengine-symbol.png'; %>
+
+    <!-- <style> -->
+    <table class="body" data-made-with-foundation>
+      <tr>
+        <td class="float-center" align="center" valign="top">
+          <center>
+            <table class="container">
+              <table class="row">
+                <tr>
+                  <th class="small-12 large-12 first columns">
+                    <center data-parsed="">
+                      <img class="logo" alt="Logo" title="Logo" src="<%= customDepartmentIcon %>" align="center" class="float-center" height="200" width="200" />
+                    </center>
+                    <h3 class="text-center"><%= name %> Report</h3>
+                    <p class="text-center"><%= payload.result.shiftlyDisplay.start %> - <%= payload.result.shiftlyDisplay.end %> &nbsp; </p>
+                    <p class="text-center text-secondary">
+                      <i>As of <%= payload.result.shiftlyDisplay.now %> </i>
+                    </p>
+
+
+                    <center data-parsed="">
+                      <table class="button large float-center rounded">
+                        <tr>
+                          <td>
+                            <table>
+                              <tr>
+                                <td><a href='https://statengine.io/home' target='_blank'>Control Center</a></td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                    </center>
+
+                    <p class="text-secondary text-center">
+                      Note: Metrics below may differ slightly from what you see on your dashboard
+                    </p>
+
+                    <hr/>
+
+                    <h5 class="text-center"> Incident Summary </h5>
+                    <table class="table-striped">
+                      <thead>
+                        <tr>
+                          <th class="text-center"> <strong>Metric</strong> </th>
+                          <th class="text-center"> <strong>Value</strong> </th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        <tr>
+                          <td class="text-center"> Platoon </td>
+                          <td class="text-center"> <%= payload.result.shiftlyDisplay.shift %> </td>
+                        </tr>
+                        <tr>
+                          <td class="text-center"> Total Incidents </td>
+                          <td class="text-center"> <%= payload.result.totalIncidentCount  %>  </td>
+                        </tr>
+                        <tr>
+                          <td class="text-center"> EMS Incidents </td>
+                          <td class="text-center"> <%= payload.result.emsIncidentCount %> </td>
+                        </tr>
+                        <tr>
+                          <td class="text-center"> Fire Incidents </td>
+                          <td class="text-center"> <%= payload.result.fireIncidentCount %> </td>
+                        </tr>
+                        <tr>
+                          <td class="text-center"> Total Responses </td>
+                          <% if(!isNaN(payload.result.totalResponses)) { %>
+                             <td class="text-center"><%= payload.result.totalResponses %></td>
+                          <% } else{ %>
+                             <td class="text-center"> - </td>
+                          <% } %>
+                        </tr>
+                        <tr>
+                          <td class="text-center"> Six Minute Response Percentage </td>
+                          <% if(!isNaN(payload.result.sixMinuteResponses)) { %>
+                             <td class="text-center"><%= payload.result.sixMinuteResponses.toFixed(2) %></td>
+                          <% } else{ %>
+                             <td class="text-center"> - </td>
+                          <% } %>
+                        </tr>
+                        <% if(showDistance) { %>
+                        <tr>
+                          <td class="text-center"> 90% Distance to Incident (mi) </td>
+                             <td class="text-center"><%= payload.result.apparatusDistancePercentile90.toFixed(2) %></td>
+                        </tr>
+                        <% } %>
+                        <tr>
+                          <td class="text-center"> 90% Turnout Time (sec) </td>
+                          <% if(!isNaN(payload.result.apparatusTurnoutPercentile90)) { %>
+                             <td class="text-center"><%= payload.result.apparatusTurnoutPercentile90.toFixed(2) %></td>
+                          <% } else{ %>
+                             <td class="text-center"> - </td>
+                          <% } %>
+                        </tr>
+                        <tr>
+                          <td class="text-center"> 90% Event Duration (min) </td>
+                          <% if(!isNaN(payload.result.eventDurationPercentile90)) { %>
+                             <td class="text-center"><%= (payload.result.eventDurationPercentile90/60.0).toFixed(2) %></td>
+                          <% } else{ %>
+                             <td class="text-center"> - </td>
+                          <% } %>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <hr/>
+
+                    <% if(showUnitSummary) { %>
+                      <h5 class="text-center"> Unit Summary </h5>
+                      <% if(payload.result.unitResponseBuckets && payload.result.unitResponseBuckets.length > 0) { %>
+                      <table class="table-striped">
+                        <thead>
+                          <tr>
+                            <th class="text-center"> <strong>Unit</strong> </th>
+                            <th class="text-center"> <strong>Incidents</strong> </th>
+
+                            <% if(showTransports) { %>
+                            <th class="text-center"> <strong>Transports</strong> </th>
+                            <% } %>
+
+                            <% if(showDistance) { %>
+                              <th class="text-center"> <strong>Distance (mi)</strong> </th>
+                            <% } %>
+
+                            <th class="text-center"> <strong>Utilization (min)</strong> </th>
+                            <th class="text-center"> <strong>90% Turnout (sec)</strong> </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <% for(var i=0; i<payload.result.unitResponseBuckets.length; i++) {%>
+                            <tr>
+                              <td class="text-center"><%= payload.result.unitResponseBuckets[i].key %></td>
+                              <td class="text-center"><%= payload.result.unitResponseBuckets[i].doc_count %></td>
+
+                              <% if(showTransports) { %>
+                                <td class="text-center"><%= payload.result.unitResponseBuckets[i].transports.value %></td>
+                              <% } %>
+
+                              <% if(showDistance) { %>
+                                <% if(!isNaN(payload.result.unitResponseBuckets[i].total_distance.value)) { %>
+                                  <td class="text-center"><%= payload.result.unitResponseBuckets[i].total_distance.value.toFixed(2) %></td>
+                                <% } else{ %>
+                                   <td class="text-center"> - </td>
+                                <% } %>
+                              <% } %>
+
+                              <% if(!isNaN(payload.result.unitResponseBuckets[i].utilization.value)) { %>
+                                <td class="text-center"><%= (payload.result.unitResponseBuckets[i].utilization.value/60.0).toFixed(2) %></td>
+                              <% } else{ %>
+                                 <td class="text-center"> - </td>
+                              <% } %>
+
+                              <% if(!isNaN(payload.result.unitResponseBuckets[i].turnout_percentile_rank.values && payload.result.unitResponseBuckets[i].turnout_percentile_rank.values['90.0'])) { %>
+                                <td class="text-center"><%= (payload.result.unitResponseBuckets[i].turnout_percentile_rank.values['90.0']).toFixed(2) %></td>
+                              <% } else{ %>
+                                 <td class="text-center"> - </td>
+                              <% } %>
+                            </tr>
+                          <% } %>
+                        </tbody>
+                      </table>
+                      <% } else{ %>
+                      <p class="text-warning"> No data found </p>
+                      <% } %>
+                    <% } %>
+
+                    <% if(showBattalionSummary) { %>
+                      <hr/>
+
+                      <h5 class="text-center"> Battalion Summary </h5>
+                      <% if(payload.result.addressBattalionBuckets && payload.result.addressBattalionBuckets.length > 0) { %>
+                      <table class="table-striped">
+                        <thead>
+                          <tr>
+                            <th class="text-center"> <strong>Battalion</strong> </th>
+                            <th class="text-center"> <strong>Incidents</strong> </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <% for(var i=0; i<payload.result.addressBattalionBuckets.length; i++) {%>
+                            <tr>
+                              <% if(payload.result.addressBattalionBuckets[i].key !== '') { %>
+                                <td class="text-center"><%= payload.result.addressBattalionBuckets[i].key %></td>
+                                <td class="text-center"><%= payload.result.addressBattalionBuckets[i].doc_count %></td>
+                              <% } %>
+                            </tr>
+                          <% } %>
+                          <tr>
+                            <% if(payload.result.addressBattalionBuckets[0].key === '') { %>
+                              <td class="text-center">Unspecified</td>
+                              <td class="text-center"><%= payload.result.addressBattalionBuckets[0].doc_count %></td>
+                            <% } %>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <% } else{ %>
+                        <p class="text-warning"> No data found </p>
+                      <% } %>
+
+                      </hr>
+                    <% } %>
+
+                    <% if(showIncidentTypeSummary) { %>
+                      <hr/>
+
+                      <h5 class="text-center"> Incident Type Summary </h5>
+                      <% if(payload.result.incidentTypeBuckets && payload.result.incidentTypeBuckets.length > 0) { %>
+                      <table class="table-striped">
+                        <thead>
+                          <tr>
+                            <th class="text-center"> <strong>Incident Type</strong> </th>
+                            <th class="text-center"> <strong>Count</strong> </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <% for(var i=0; i<payload.result.incidentTypeBuckets.length; i++) {%>
+                            <tr>
+                              <% if(payload.result.incidentTypeBuckets[i].key !== '') { %>
+                                <td class="text-center"><%= payload.result.incidentTypeBuckets[i].key %></td>
+                                <td class="text-center"><%= payload.result.incidentTypeBuckets[i].doc_count %></td>
+                              <% } %>
+                            </tr>
+                          <% } %>
+                          <tr>
+                            <% if(payload.result.incidentTypeBuckets[0].key === '') { %>
+                              <td class="text-center">Unspecified</td>
+                              <td class="text-center"><%= payload.result.incidentTypeBuckets[0].doc_count %></td>
+                            <% } %>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <% } else{ %>
+                        <p class="text-warning"> No data found </p>
+                      <% } %>
+
+                      </hr>
+                    <% } %>
+
+                    <table class="spacer">
+                      <tbody>
+                        <tr>
+                          <td height="50px" style="font-size:50px;line-height:50px;">&#xA0;</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <p class="text-center">
+                      Feedback? Please email us at <a href="mailto:contact@statengine.io">contact@statengine.io</a>
+                    </p>
+                    <p class="text-secondary text-center">
+                      Powered by <a href='https://statengine.io/?utm_source=statenginereporting&utm_medium=email' target='_blank'>StatEngine</a>
+                    <p>
+                  </th>
+                  <th class="expander"></th>
+                </tr>
+              </table>
+            </table>
+          </center>
+        </td>
+      </tr>
+    </table>
+    <p>&nbsp;</p>
+  </body>
+</html>
