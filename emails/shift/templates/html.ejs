@@ -14,6 +14,7 @@
     <% const showUnitSummary = !locals.sections || (locals.sections && locals.sections.unitSummary !== false) || (locals.sections && locals.sections.unitSummary && locals.sections.unitSummary.enabled !== false); %>
     <% const showIncidentTypeSummary = !locals.sections || (locals.sections && locals.sections.showIncidentTypeSummary !== false) || (locals.sections && locals.sections.showIncidentTypeSummary && locals.sections.showIncidentTypeSummary.enabled !== false); %>
     <% const showTransports = locals.sections && showUnitSummary && ( typeof(locals.sections.unitSummary) === "object" && locals.sections.unitSummary.showTransports === true); %>
+    <% const showAlerts = locals.sections && locals.sections.showAlerts; %>
     <% const showLocationSummary = !locals.sections || (locals.sections && locals.sections.showLocationSummary !== false) || (locals.sections && locals.sections.showLocationSummary && locals.sections.showLocationSummary.enabled !== false); %>
 
     <% const customDepartmentIcon = locals.icon || 'https://s3.amazonaws.com/statengine-public-assets/statengine-symbol.png'; %>
@@ -166,7 +167,11 @@
                               <% } %>
 
                               <% if(!isNaN(payload.result.unitResponseBuckets[i].utilization.value)) { %>
-                                <td class="text-center"><%= (payload.result.unitResponseBuckets[i].utilization.value/60.0).toFixed(2) %></td>
+                                <% if(payload.result.unitResponseBuckets[i].utilization.value/60.0 > 359 && showAlerts) { %>
+                                  <td class="text-center background-danger"><%= (payload.result.unitResponseBuckets[i].utilization.value/60.0).toFixed(2) %></td>
+                                <% } else{ %>
+                                  <td class="text-center"><%= (payload.result.unitResponseBuckets[i].utilization.value/60.0).toFixed(2) %></td>
+                                <% } %>
                               <% } else{ %>
                                  <td class="text-center"> - </td>
                               <% } %>
@@ -175,6 +180,36 @@
                                 <td class="text-center"><%= (payload.result.unitResponseBuckets[i].turnout_percentile_rank.values['90.0']).toFixed(2) %></td>
                               <% } else{ %>
                                  <td class="text-center"> - </td>
+                              <% } %>
+                            </tr>
+                          <% } %>
+                        </tbody>
+                      </table>
+                      <% } else{ %>
+                      <p class="text-warning"> No data found </p>
+                      <% } %>
+                    <% } %>
+
+                    <% if(showUnitSummary && showAlerts) { %>
+                      <h6 class="text-center"> Fire Incidents </h6>
+                      <% if(payload.result.unitFireIncidents && payload.result.unitFireIncidents.length > 0) { %>
+                      <table class="table-striped">
+                        <thead>
+                          <tr>
+                            <th class="text-center"> <strong>Unit</strong> </th>
+                            <th class="text-center"> <strong>Incidents</strong> </th>
+                            <th class="text-center"> <strong>Max Event Time (min)</strong> </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <% for(var i=0; i<payload.result.unitFireIncidents.length; i++) {%>
+                            <tr>
+                              <td class="text-center"><%= payload.result.unitFireIncidents[i].key %></td>
+                              <td class="text-center"><%= payload.result.unitFireIncidents[i].doc_count %></td>
+                              <% if(payload.result.unitFireIncidents[i].max_exposure.value/60.0 > 30) { %>
+                                <td class="text-center background-warning"><%= (payload.result.unitFireIncidents[i].max_exposure.value/60.0).toFixed(2) %></td>
+                              <% } else{ %>
+                                <td class="text-center"><%= (payload.result.unitFireIncidents[i].max_exposure.value/60.0).toFixed(2) %></td>
                               <% } %>
                             </tr>
                           <% } %>

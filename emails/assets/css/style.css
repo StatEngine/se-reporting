@@ -13,3 +13,11 @@
 .table-striped td {
   padding: 5px;
 }
+
+.background-warning {
+   background-color: yellow;
+}
+
+.background-danger {
+   background-color: red;
+}

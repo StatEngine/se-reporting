@@ -44,7 +44,10 @@ class Email extends Action {
   notify(payload) {
     logger.info('Email notify()');
 
-    console.dir(payload)
+    const util = require('util')
+
+    console.log(util.inspect(payload, {showHidden: false, depth: null}))
+
     if (payload.result.locations && payload.result.locations.hits) {
       let geomFeatureArray = '';
       const mapIcon = 'fire-station';
