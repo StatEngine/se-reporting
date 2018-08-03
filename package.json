@@ -16,7 +16,7 @@
     "prepare": "npm run compile"
   },
   "dependencies": {
-    "@statengine/shiftly": "0.0.13",
+    "@statengine/shiftly": ">0.0.13",
     "amqplib": "^0.5.2",
     "bluebird": "^3.5.1",
     "bunyan": "^1.8.12",

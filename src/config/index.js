@@ -19,6 +19,13 @@ export default {
     httpAuth: (process.env.ELASTICSEARCH_USER && process.env.ELASTICSEARCH_PASSWORD) ? `${process.env.ELASTICSEARCH_USER}:${process.env.ELASTICSEARCH_PASSWORD}` : undefined,
     apiVersion: process.env.ELASTICSEARCH_API_VERSION || '5.5',
   },
+  statengine: {
+    uri: process.env.STATENGINE_URI || 'http://localhost:3000/api',
+    auth: {
+      username: process.env.STATENGINE_SVC_ACCOUNT_USER || 'srvAccount',
+      password: process.env.STATENGINE_SVC_ACCOUNT_PASSWORD || 'password'
+    }
+  },
   email: {
     mandrill: {
       auth: {
