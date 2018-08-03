@@ -15,9 +15,13 @@
 }
 
 .background-warning {
-   background-color: yellow;
+   background-color:	#FAFAD2;
 }
 
 .background-danger {
-   background-color: red;
+   background-color:	#F08080;
+}
+
+.background-success {
+   background-color: #90EE90;
 }
