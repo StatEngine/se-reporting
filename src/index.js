@@ -1,16 +1,31 @@
+import request from 'request-promise';
+import later from 'later';
+import _ from 'lodash';
+
 import config from './config';
+import { schedule } from './lib/scheduler/scheduler';
 
-import { logger } from './config/logger';
+// schedule everything in UTC
+later.date.UTC();
 
-import { startConsumer } from './lib/consumer';
-import { startPublisher } from './lib/publisher';
+function getEmailReportConfiguration() {
+  const options = _.cloneDeep(config.statengine);
+  options.uri += '/extension-configurations?name=Email Report';
+  options.json = true;
 
-startConsumer((consumerErr) => {
-  if (consumerErr) process.exit(1);
+  return request(options);
+}
 
-  setTimeout(() => startPublisher((publisherErr) => {
-    if (publisherErr) process.exit(1);
+getEmailReportConfiguration()
+  .then((periodics) => {
+    periodics.forEach((periodic) => {
+      if (!_.isNil(periodic.enabled) && periodic.enabled === false) return;
 
-    logger.info('Process up and running!');
-  }), config.startup.delay);
-});
+      const periodicConfig = periodic.config_json;
+      if (_.get(periodicConfig, 'schedulerOptions.later.text')) {
+        const sched = later.parse.text(periodicConfig.schedulerOptions.later.text);
+
+        schedule(periodic._id, sched, 'EmailReport', periodic);
+      }
+    });
+  });

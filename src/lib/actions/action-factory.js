@@ -2,26 +2,20 @@ import _ from 'lodash';
 
 import { logger } from '../../config/logger';
 
-import console from './console';
-import email from './email';
-import webhook from './webhook';
-import twitter from './twitter';
+import emailReport from './emailReport';
 
 const registrations = {
-  console,
-  email,
-  webhook,
-  twitter,
+  EmailReport: emailReport,
 };
 
-export function createAction(type, fireDepartment, options = {}) {
-  const Action = registrations[type];
+export function createAction(name, options = {}) {
+  const Action = registrations[name];
   if (!Action) {
-    logger.error(`Unknown Action type: ${type}`);
+    logger.error(`Unknown Action: ${name}`);
     return undefined;
   }
 
-  return new Action(fireDepartment, _.cloneDeep(options));
+  return new Action(_.cloneDeep(options));
 }
 
 export default { createAction };
