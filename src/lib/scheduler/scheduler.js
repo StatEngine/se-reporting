@@ -5,17 +5,16 @@ import Watcher from '../watcher';
 import timerStore from './timer-store';
 
 function removeTimer(id) {
-  /*const baseKey = [extensionConfig.FireDepartment.firecares_id, extensionConfig.Extension.name].join('-');
-  timerStore.removeAllInterval(baseKey);*/
+  timerStore.removeInterval(id);
 }
 
-export function schedule(id, laterSchedule, task) {
+export function schedule(id, laterSchedule, actionName, actionOptions) {
   removeTimer(id);
 
-  const watcher = new Watcher(task);
+  const watcher = new Watcher(actionName, actionOptions);
   const interval = later.setInterval(watcher.execute.bind(watcher), laterSchedule);
   timerStore.addInterval(id, interval);
-  logger.info(`Done scheduling ${id}`);
+  logger.info(`Done scheduling ${id}, next occurence at ${later.schedule(laterSchedule).next(1)}`);
 }
 
 export default { schedule };

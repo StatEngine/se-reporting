@@ -1,52 +1,31 @@
 import request from 'request-promise';
-import moment from 'moment';
 import later from 'later';
 import _ from 'lodash';
+
+import config from './config';
+import { schedule } from './lib/scheduler/scheduler';
 
 // schedule everything in UTC
 later.date.UTC();
 
-import { FirecaresLookup } from '@statengine/shiftly';
-
-import config from './config';
-import { logger } from './config/logger';
-
-import { schedule } from './lib/scheduler/scheduler';
-
-function getFireDepartments() {
-  const options = _.deepClone(config.statengine);
-  options.uri += '/fire-departments';
+function getEmailReportConfiguration() {
+  const options = _.cloneDeep(config.statengine);
+  options.uri += '/extension-configurations?name=Email Report';
   options.json = true;
 
   return request(options);
 }
 
-function getEndOfShiftSchedule(department) {
-  const ShiftConfig = FirecaresLookup[department.firecares_id];
-  if (!ShiftConfig) {
-    logger.warn('No ShiftConfig found.  Not scheduling');
-    return;
-  }
-  const shiftly = new ShiftConfig();
+getEmailReportConfiguration()
+  .then((periodics) => {
+    periodics.forEach((periodic) => {
+      if (!_.isNil(periodic.enabled) && periodic.enabled === false) return;
 
-  // Run 5 minutes after every shift
-  const startTimeUTC = moment(shiftly.shiftStartDate)
-    .utc()
-    .add(5, 'minutes');
+      const periodicConfig = periodic.config_json;
+      if (_.get(periodicConfig, 'schedulerOptions.later.text')) {
+        const sched = later.parse.text(periodicConfig.schedulerOptions.later.text);
 
-  const laterText = `at ${startTimeUTC.format('HH:mm')}`;
-  logger.info(`Detected ${department.name} end of shift: ${laterText}`);
-  return later.parse.text(laterText);
-}
-
-getFireDepartments()
-  .then(departments => {
-    departments.forEach(department => {
-      // end of shift report
-      let endOfShiftSchedule = getEndOfShiftSchedule(department);
-      if (endOfShiftSchedule) {
-        let id = `${department.firecares_id}:endOfShiftReport`;
-        schedule(id, endOfShiftSchedule, { name: 'EndOfShiftReport', type: 'SendEmailReport', options: { type: 'endOfShift', department }});
+        schedule(periodic._id, sched, 'EmailReport', periodic);
       }
     });
   });

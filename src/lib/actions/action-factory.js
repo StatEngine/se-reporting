@@ -2,16 +2,16 @@ import _ from 'lodash';
 
 import { logger } from '../../config/logger';
 
-import sendEmailReport from './sendEmailReport';
+import emailReport from './emailReport';
 
 const registrations = {
-  sendEmailReport,
+  EmailReport: emailReport,
 };
 
-export function createAction(type, options = {}) {
-  const Action = registrations[type];
+export function createAction(name, options = {}) {
+  const Action = registrations[name];
   if (!Action) {
-    logger.error(`Unknown Action type: ${type}`);
+    logger.error(`Unknown Action: ${name}`);
     return undefined;
   }
 

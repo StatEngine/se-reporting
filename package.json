@@ -9,10 +9,8 @@
   "scripts": {
     "lint": "node_modules/eslint/bin/eslint.js src/** test/**",
     "test": "mocha --require babel-core/register ./test/**/*.js",
-    "compile": "npm run babelify && npm run htmlminify && npm run cssminify",
+    "compile": "npm run babelify",
     "babelify": "babel -d lib/ src/ --copy-files",
-    "cssminify": "cleancss -o emails/assets/combined.min.css emails/assets/css/*",
-    "htmlminify": "html-minifier --input-dir emails/shift/templates/ --output-dir emails/shift/ -c .htmlminifiyrc",
     "prepare": "npm run compile"
   },
   "dependencies": {
