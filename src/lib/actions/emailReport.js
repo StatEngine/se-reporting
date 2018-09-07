@@ -23,6 +23,7 @@ class EmailReport extends Action {
       fireDepartmentId: this.options.fire_department__id,
       startDate: moment().format(),
       previous: true,
+      test: true,
     };
     requestOptions.json = true;
     requestOptions.method = 'POST';
