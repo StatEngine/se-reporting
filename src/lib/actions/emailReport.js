@@ -18,13 +18,14 @@ class EmailReport extends Action {
 
     const requestOptions = _.cloneDeep(config.statengine);
     requestOptions.uri += '/email/timeRangeAnalysis';
-    requestOptions.qs = this.options.config_json.schedulerOptions.qs;
-    requestOptions.qs.startDate = moment().format('YYYY-MM-DD');
-    requestOptions.qs.fireDepartmentId = this.options.fire_department__id;
+    requestOptions.qs = {
+      configurationId: this.options._id,
+      fireDepartmentId: this.options.fire_department__id,
+      startDate: moment().format(),
+      previous: true,
+    };
     requestOptions.json = true;
     requestOptions.method = 'POST';
-
-    console.dir(requestOptions);
 
     return request(requestOptions);
   }
