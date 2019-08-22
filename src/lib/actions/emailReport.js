@@ -17,12 +17,16 @@ class EmailReport extends Action {
     console.dir(this.options);
 
     const requestOptions = _.cloneDeep(config.statengine);
+    let previous = true;
+    if (!_.isNil(this.options.config_json.previous)) previous = this.options.config_json.previous;
+    console.info(`previous = ${previous}`);
+
     requestOptions.uri += '/email/timeRangeAnalysis';
     requestOptions.qs = {
       configurationId: this.options._id,
       fireDepartmentId: this.options.fire_department__id,
       startDate: moment().format(),
-      previous: true,
+      previous,
       test: false,
     };
     requestOptions.json = true;
