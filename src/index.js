@@ -26,16 +26,30 @@ function setTimeDst(sched) {
   return [time];
 }
 
-function scheduleAll(isDst) {
+function isDst(deptId) {
+  // array of the departments that do not participate in
+  // daylight savings time
+  const nonDSTDepartments = [
+    '82670', // Golder Ranch, AZ
+    '90649', // Northwest AZ
+    '93429', // Rincon Vallye, AZ
+    '97477'  // Tuscon, AZ 
+  ];
+  
+  return nonDSTDepartments.findIndex(d => d === deptId) === -1;
+}
+
+function scheduleAll() {
   getEmailReportConfiguration()
     .then((periodics) => {
       periodics.forEach((periodic) => {
         if (!_.isNil(periodic.enabled) && periodic.enabled === false) return;
         const periodicConfig = periodic.config_json;
         if (_.get(periodicConfig, 'schedulerOptions.later.text')) {
-          let schedText = periodicConfig.schedulerOptions.later.text;
+          const schedText = periodicConfig.schedulerOptions.later.text;
           const sched = later.parse.text(schedText);
-          if (isDst) {
+          const deptId = periodic.fire_department__id;
+          if (isDst(deptId)) {
             // if daylight savings time, then we need to update
             // the schedule time
             sched.schedules[0].t = setTimeDst(sched);
@@ -53,10 +67,8 @@ const startDstSchedule = later.parse.recur().on(3).month().on(2).weekOfMonth().o
 // daylight savings time ends on the first Sunday of November
 const endDstSchedule = later.parse.recur().on(11).month().on(1).weekOfMonth().on(1).dayOfWeek().on(1).hour();
 
-const startDstInterval = later.setInterval(scheduleAll(true), startDstSchedule);
-const endDstInterval = later.setInterval(scheduleAll(false), endDstSchedule);
+const startDstInterval = later.setInterval(scheduleAll, startDstSchedule);
+const endDstInterval = later.setInterval(scheduleAll, endDstSchedule);
 
 timerStore.addInterval('startDst', startDstInterval);
 timerStore.addInterval('endDst', endDstInterval);
-
-
