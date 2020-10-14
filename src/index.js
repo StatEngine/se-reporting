@@ -1,6 +1,7 @@
 import request from 'request-promise';
 import later from 'later';
 import _ from 'lodash';
+import moment from 'moment';
 
 import config from './config';
 import timerStore from './timer-store';
@@ -36,7 +37,7 @@ function isDst(deptId) {
     '97477'  // Tuscon, AZ 
   ];
   
-  return nonDSTDepartments.findIndex(d => d === deptId) === -1;
+  return (nonDSTDepartments.findIndex(d => d === deptId) === -1 && moment().isDST());
 }
 
 function scheduleAll() {
@@ -67,8 +68,5 @@ const startDstSchedule = later.parse.recur().on(3).month().on(2).weekOfMonth().o
 // daylight savings time ends on the first Sunday of November
 const endDstSchedule = later.parse.recur().on(11).month().on(1).weekOfMonth().on(1).dayOfWeek().on(1).hour();
 
-const startDstInterval = later.setInterval(scheduleAll, startDstSchedule);
-const endDstInterval = later.setInterval(scheduleAll, endDstSchedule);
-
-timerStore.addInterval('startDst', startDstInterval);
-timerStore.addInterval('endDst', endDstInterval);
+later.setInterval(scheduleAll, startDstSchedule);
+later.setInterval(scheduleAll, endDstSchedule);
