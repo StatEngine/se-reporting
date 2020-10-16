@@ -4,7 +4,6 @@ import _ from 'lodash';
 import moment from 'moment';
 
 import config from './config';
-import timerStore from './timer-store';
 import { schedule } from './lib/scheduler/scheduler';
 
 // schedule everything in UTC
