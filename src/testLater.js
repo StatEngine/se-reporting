@@ -12,14 +12,14 @@ const startDstSchedule = later.parse.recur()
   .dayOfWeek()
   .on(15) // 3pm UTC, 11am EST
   .hour()
-  .on(13) // 3:13pm UTC, 11:13am EST
+  .on(30) // laterjs minutes are not 0 based - this will trigger at 3:30pm UTC
   .minute();
 
 function getEmailReportConfiguration() {
   return [
     {
       enabled: true,
-      fire_department__id: '1234',
+      fire_department__id: '82670',
       config_json: {
         schedulerOptions: {
           later: {
@@ -30,7 +30,7 @@ function getEmailReportConfiguration() {
     },
     {
       enabled: true,
-      fire_department__id: '1234',
+      fire_department__id: '123',
       config_json: {
         schedulerOptions: {
           later: {
@@ -41,7 +41,7 @@ function getEmailReportConfiguration() {
     },
     {
       enabled: true,
-      fire_department__id: '1234',
+      fire_department__id: '82670',
       config_json: {
         schedulerOptions: {
           later: {
@@ -63,6 +63,9 @@ function isDst(deptId) {
     '97477', // Tuscon, AZ
   ];
   const isDeptDST = nonDSTDepartments.findIndex(d => d === deptId) === -1;
+
+  // may need to set this to just true/false if you want to test specific behavior
+  // but your current date is/is not DST
   const isCurrentlyDST = moment().isDST();
   console.log(`isDeptDST: ${isDeptDST}`);
   console.log(`isCurrentlyDST: ${isCurrentlyDST}`);
