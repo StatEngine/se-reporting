@@ -22,7 +22,7 @@ function getEmailReportConfiguration() {
 function setTimeDst(sched) {
   let time = sched.schedules[0].t[0];
   // later uses seconds, not miliseconds
-  time = time - 3600;
+  time -= 3600;
   return [time];
 }
 
@@ -33,9 +33,9 @@ function isDst(deptId) {
     '82670', // Golder Ranch, AZ
     '90649', // Northwest AZ
     '93429', // Rincon Vallye, AZ
-    '97477'  // Tuscon, AZ 
+    '97477', // Tuscon, AZ
   ];
-  
+
   return (nonDSTDepartments.findIndex(d => d === deptId) === -1 && moment().isDST());
 }
 
@@ -63,9 +63,17 @@ function scheduleAll() {
 // when this container starts up, we want to run scheduleAll on the days that daylight
 // savings time starts and ends
 // daylight savings time starts on the second Sunday of March
-const startDstSchedule = later.parse.recur().on(3).month().on(2).weekOfMonth().on(1).hour();
+const startDstSchedule = later.parse.recur().on(3).month().on(2)
+  .weekOfMonth()
+  .on(1)
+  .hour();
 // daylight savings time ends on the first Sunday of November
-const endDstSchedule = later.parse.recur().on(11).month().on(1).weekOfMonth().on(1).dayOfWeek().on(1).hour();
+const endDstSchedule = later.parse.recur().on(11).month().on(1)
+  .weekOfMonth()
+  .on(1)
+  .dayOfWeek()
+  .on(1)
+  .hour();
 
 later.setInterval(scheduleAll, startDstSchedule);
 later.setInterval(scheduleAll, endDstSchedule);
