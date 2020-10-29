@@ -21,4 +21,5 @@ COPY . /usr/src/se-reporting-engine
 RUN npm run compile
 
 ENV NODE_ENV=production
+
 CMD [ "node", "/usr/src/se-reporting-engine/lib/index.js" ]
