@@ -17,16 +17,16 @@ function getEmailReportConfiguration() {
   return request(options);
 }
 
-// if daylight savings time, then
-// subtract an hour from the run time
-function setTimeDst(sched) {
+// if not currently DST, then we need to subtract
+// an hour
+function subtractAnHour(sched) {
   let time = sched.schedules[0].t[0];
   // later uses seconds, not miliseconds
   time -= 3600;
   return [time];
 }
 
-function isDst(deptId) {
+function shouldSubtractAnHour(deptId) {
   // array of the departments that do not participate in
   // daylight savings time
   const nonDSTDepartments = [
@@ -36,7 +36,8 @@ function isDst(deptId) {
     '97477', // Tuscon, AZ
   ];
 
-  return (nonDSTDepartments.findIndex(d => d === deptId) === -1 && moment().isDST());
+  // if a DST department && it is not currently DST - we need to "fall back"
+  return (nonDSTDepartments.findIndex(d => d === deptId) === -1 && moment().isDST() === false);
 }
 
 function scheduleAll() {
@@ -49,10 +50,8 @@ function scheduleAll() {
           const schedText = periodicConfig.schedulerOptions.later.text;
           const sched = later.parse.text(schedText);
           const deptId = periodic.fire_department__id;
-          if (isDst(deptId)) {
-            // if daylight savings time, then we need to update
-            // the schedule time
-            sched.schedules[0].t = setTimeDst(sched);
+          if (shouldSubtractAnHour(deptId)) {
+            sched.schedules[0].t = subtractAnHour(sched);
           }
           schedule(periodic._id, sched, 'EmailReport', periodic);
         }
