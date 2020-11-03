@@ -126,8 +126,11 @@ function scheduleAll(schedText) {
     }
   });
 }
-const sched = later.parse.text('at 6:32 pm');
-later.setTimeout(function() { scheduleAll('at 6:33 pm') }, sched);
+
+const schedulerTime = 'at 9:32 pm';
+const emailSendTime = 'at 9:33 pm';
+const sendDailyEmailSched = later.parse.text(schedulerTime);
+later.setTimeout(function() { scheduleAll(emailSendTime) }, sendDailyEmailSched);
 // console.log(`IS DST: ${moment().isDST()}`);
 // later.setInterval(scheduleAll, startDstSchedule);
 // later.setInterval(scheduleAll, endDstSchedule);
