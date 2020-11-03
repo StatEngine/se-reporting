@@ -49,7 +49,7 @@ function sendDailyEmail(sendTime) {
         if (!_.isNil(periodic.enabled) && periodic.enabled === false) return;
         const periodicConfig = periodic.config_json;
         if (_.get(periodicConfig, 'name') === 'Daily') {
-          const sched = sendTime;
+          const sched = later.parse.text(sendTime);
           const deptId = periodic.fire_department__id;
           if (shouldSubtractAnHour(deptId)) {
             sched.schedules[0].t = subtractAnHour(sched);
