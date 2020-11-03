@@ -107,7 +107,7 @@ const endDstSchedule = later.parse.recur().on(11).month().on(1)
 // set schedulerTime and emailSendTime to whatever time you want, but
 // just remember a couple things: emailSendTime should be LATER than schedulerTime
 // and the times are in UTC
-const schedulerTime = 'at 6:45 pm';
-const emailSendTime = 'at 6:49 pm';
+const schedulerTime = 'at 9:55 pm';
+const emailSendTime = 'at 10:00 pm';
 const sendDailyEmailSched = later.parse.text(schedulerTime);
 later.setTimeout(function() { sendDailyEmail(emailSendTime) }, sendDailyEmailSched);
