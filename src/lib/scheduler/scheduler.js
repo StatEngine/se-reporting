@@ -6,7 +6,7 @@ import Watcher from '../watcher';
 import timerStore from './timer-store';
 
 function removeTimer(id) {
-  console.log(`REMOVE: ${id}`)
+  console.log(`REMOVE: ${id}`);
   timerStore.intervals.forEach((value, key) => {
     console.log(`Before Remove - TimerId: ${key}`);
   });
