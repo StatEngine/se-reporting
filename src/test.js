@@ -40,10 +40,11 @@ const endDstSchedule = later.parse.recur()
 function getEmailReportConfiguration() {
   return [
     {
-      _id: 'daily',
+      _id: 'daily123',
       enabled: true,
       fire_department__id: '82670',
       config_json: {
+        name: 'Daily',
         schedulerOptions: {
           later: {
             text: 'at 3:19 pm',
@@ -52,10 +53,11 @@ function getEmailReportConfiguration() {
       },
     },
     {
-      _id: 'weekly',
+      _id: 'weekly456',
       enabled: true,
       fire_department__id: '123',
       config_json: {
+        name: 'Weekly',
         schedulerOptions: {
           later: {
             text: 'on the first day of the week at 3:19 pm',
@@ -64,10 +66,11 @@ function getEmailReportConfiguration() {
       },
     },
     {
-      _id: 'monthly',
+      _id: 'monthly789',
       enabled: true,
       fire_department__id: '82670',
       config_json: {
+        name: 'Monthly',
         schedulerOptions: {
           later: {
             text: 'on the first day of the month at 3:19 pm',
@@ -78,7 +81,16 @@ function getEmailReportConfiguration() {
   ];
 }
 
-function isDst(deptId) {
+// if not currently DST, then we need to subtract
+// an hour
+function subtractAnHour(sched) {
+  let time = sched.schedules[0].t[0];
+  // later uses seconds, not miliseconds
+  time -= 3600;
+  return [time];
+}
+
+function shouldSubtractAnHour(deptId) {
   // array of the departments that do not participate in
   // daylight savings time
   const nonDSTDepartments = [
@@ -87,44 +99,36 @@ function isDst(deptId) {
     '93429', // Rincon Vallye, AZ
     '97477', // Tuscon, AZ
   ];
-  const isDeptDST = nonDSTDepartments.findIndex(d => d === deptId) === -1;
 
-  // may need to set this to just true/false if you want to test specific behavior
-  // but your current date is/is not DST
-  const isCurrentlyDST = moment().isDST();
-  return (isDeptDST && isCurrentlyDST);
+  // if a DST department && it is not currently DST - we need to "fall back"
+  return (nonDSTDepartments.findIndex(d => d === deptId) === -1 && moment().isDST() === false);
 }
 
-// if daylight savings time, then
-// subtract an hour from the run time
-function setTimeDst(sched) {
-  let time = sched.schedules[0].t[0];
-  // later uses seconds, not miliseconds
-  time -= 3600;
-  return [time];
-}
-
-function scheduleAll() {
-  console.log(`SCHEDULE ALL : ${new Date()}`);
+function scheduleAll(schedText) {
+  console.log(schedText);
 
   const periodics = getEmailReportConfiguration();
   periodics.forEach((periodic) => {
     if (!_.isNil(periodic.enabled) && periodic.enabled === false) return;
     const periodicConfig = periodic.config_json;
-    if (_.get(periodicConfig, 'schedulerOptions.later.text')) {
-      const schedText = periodicConfig.schedulerOptions.later.text;
+    if (_.get(periodicConfig, 'name') === 'Daily') {
+      console.log(`found a daily with id: ${periodic._id}`);
+
+      // const schedText = periodicConfig.schedulerOptions.later.text;
       const sched = later.parse.text(schedText);
-      const deptId = periodic.fire_department__id;
-      if (isDst(deptId)) {
-        // if daylight savings time, then we need to update
-        // the schedule time
-        sched.schedules[0].t = setTimeDst(sched);
-      }
-      schedule(periodic._id, sched, 'EmailReport', periodic);
+      // const deptId = periodic.fire_department__id;
+      // if (shouldSubtractAnHour(deptId)) {
+      //   // if daylight savings time, then we need to update
+      //   // the schedule time
+      //   sched.schedules[0].t = subtractAnHour(sched);
+      // }
+      schedule(periodic._id, sched, 'TestAction', periodic);
     }
   });
 }
-
-later.setInterval(scheduleAll, startDstSchedule);
-later.setInterval(scheduleAll, endDstSchedule);
+const sched = later.parse.text('at 6:32 pm');
+later.setTimeout(function() { scheduleAll('at 6:33 pm') }, sched);
+// console.log(`IS DST: ${moment().isDST()}`);
+// later.setInterval(scheduleAll, startDstSchedule);
+// later.setInterval(scheduleAll, endDstSchedule);
 

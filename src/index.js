@@ -36,8 +36,28 @@ function shouldSubtractAnHour(deptId) {
     '97477', // Tuscon, AZ
   ];
 
-  // if a DST department && it is not currently DST - we need to "fall back"
+  // if a DST department && it is not currently DST, then we need to "fall back"
   return (nonDSTDepartments.findIndex(d => d === deptId) === -1 && moment().isDST() === false);
+}
+
+function sendDailyEmail(sendTime) {
+  console.log(`sendDailyEmail : ${sendTime}`);
+
+  getEmailReportConfiguration()
+    .then((periodics) => {
+      periodics.forEach((periodic) => {
+        if (!_.isNil(periodic.enabled) && periodic.enabled === false) return;
+        const periodicConfig = periodic.config_json;
+        if (_.get(periodicConfig, 'name') === 'Daily') {
+          const sched = sendTime;
+          const deptId = periodic.fire_department__id;
+          if (shouldSubtractAnHour(deptId)) {
+            sched.schedules[0].t = subtractAnHour(sched);
+          }
+          schedule(periodic._id, sched, 'EmailReport', periodic);
+        }
+      });
+    });
 }
 
 function scheduleAll() {
@@ -74,5 +94,13 @@ const endDstSchedule = later.parse.recur().on(11).month().on(1)
   .on(1)
   .hour();
 
-later.setInterval(scheduleAll, startDstSchedule);
-later.setInterval(scheduleAll, endDstSchedule);
+// we want to reschedule on start and end of DST
+// later.setInterval(scheduleAll, startDstSchedule);
+// later.setInterval(scheduleAll, endDstSchedule);
+
+// go ahead and run the schedule immediately, and it will handle whatever the current
+// state of DST is
+// scheduleAll();
+
+const sendDailyEmailSched = later.parse.text('at 6:32 pm');
+later.setTimeout(function() { sendDailyEmail('at 6:33 pm') }, sendDailyEmailSched);
