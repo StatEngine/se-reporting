@@ -77,7 +77,7 @@ function scheduleAll() {
 
 // go ahead and run the schedule immediately, and it will handle whatever the current
 // state of DST is
-scheduleAll();
+// scheduleAll();
 
 // when this container starts up, we want to run scheduleAll on the days that daylight
 // savings time starts and ends
@@ -95,11 +95,11 @@ const endDstSchedule = later.parse.recur().on(11).month().on(1)
   .hour();
 
 // we want to reschedule on start and end of DST
-later.setInterval(scheduleAll, startDstSchedule);
-later.setInterval(scheduleAll, endDstSchedule);
+// later.setInterval(scheduleAll, startDstSchedule);
+// later.setInterval(scheduleAll, endDstSchedule);
 
 // these next two lines are ONLY for resending the daily emails if they don't
 // go out for some reason
 // remember that times are all in UTC
-// const emailSendTime = 'at 4:20 am';
-// sendDailyEmail(emailSendTime);
+const emailSendTime = 'at 4:30 pm';
+sendDailyEmail(emailSendTime);
