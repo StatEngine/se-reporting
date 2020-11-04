@@ -50,10 +50,6 @@ function sendDailyEmail(sendTime) {
         const periodicConfig = periodic.config_json;
         if (_.get(periodicConfig, 'name') === 'Daily') {
           const sched = later.parse.text(sendTime);
-          const deptId = periodic.fire_department__id;
-          if (shouldSubtractAnHour(deptId)) {
-            sched.schedules[0].t = subtractAnHour(sched);
-          }
           schedule(periodic._id, sched, 'EmailReport', periodic);
         }
       });
@@ -105,5 +101,5 @@ const endDstSchedule = later.parse.recur().on(11).month().on(1)
 // these next two lines are ONLY for resending the daily emails if they don't
 // go out for some reason
 // remember that times are all in UTC
-const emailSendTime = 'at 3:45 am';
+const emailSendTime = 'at 4:20 am';
 sendDailyEmail(emailSendTime);
