@@ -75,6 +75,10 @@ function scheduleAll() {
     });
 }
 
+// go ahead and run the schedule immediately, and it will handle whatever the current
+// state of DST is
+scheduleAll();
+
 // when this container starts up, we want to run scheduleAll on the days that daylight
 // savings time starts and ends
 // daylight savings time starts on the second Sunday of March
@@ -93,10 +97,6 @@ const endDstSchedule = later.parse.recur().on(11).month().on(1)
 // we want to reschedule on start and end of DST
 later.setInterval(scheduleAll, startDstSchedule);
 later.setInterval(scheduleAll, endDstSchedule);
-
-// go ahead and run the schedule immediately, and it will handle whatever the current
-// state of DST is
-scheduleAll();
 
 // these next two lines are ONLY for resending the daily emails if they don't
 // go out for some reason
