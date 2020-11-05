@@ -22,10 +22,25 @@ class EmailReport extends Action {
     console.info(`previous = ${previous}`);
 
     requestOptions.uri += '/email/timeRangeAnalysis';
+
+    const nonDSTDepartments = [
+      '82670', // Golder Ranch, AZ
+      '90649', // Northwest AZ
+      '93429', // Rincon Vallye, AZ
+      '97477', // Tuscon, AZ
+    ];
+    const deptId = this.options.fire_department__id;
+    let startDate = moment().format();
+
+    // adjust for DST if we need to
+    if (nonDSTDepartments.findIndex(d => d === deptId) === -1 && moment().isDST() === false) {
+      startDate = moment().add(1, 'hours').format();
+    }
+
     requestOptions.qs = {
       configurationId: this.options._id,
       fireDepartmentId: this.options.fire_department__id,
-      startDate: moment().format(),
+      startDate,
       previous,
       test: false,
     };
