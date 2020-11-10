@@ -17,12 +17,22 @@ function getEmailReportConfiguration() {
   return request(options);
 }
 
-// if not currently DST, then we need to subtract
-// an hour
+// UTC does not account for DST hence the offset between US Eastern and UTC time changes
+// from -5hrs to -4 hrs during DST (approx March-Nov)
+// Hence, if it is not currently DST, then we need to add an hour offset to the schedule
+// since the clock has "fallen back". It is also important to remember that the times/schedules specified
+// in the DB configs assume a DST offset.
+// e.g.
+// Richmond wants emails at approx 8:00 am EST
+// Their config specifies approx 12:00 pm UTC
+// if DST is being observed this is fine and we don't need to do anything,
+// however if DST is NOT observed then the -5hrs offset kicks-in on Nov 1st
+// and the email would go out at approx 7 am EST, therefore we add an hour
+// to the time to make it go out at 8 am EST as desired.
 function subtractAnHour(sched) {
   let time = sched.schedules[0].t[0];
-  // later uses seconds, not miliseconds
-  time -= 3600;
+  // later uses seconds, not milliseconds
+  time += 3600;
   return [time];
 }
 
@@ -36,7 +46,7 @@ function shouldSubtractAnHour(deptId) {
     '97477', // Tuscon, AZ
   ];
 
-  // if a DST department && it is not currently DST, then we need to "fall back"
+  // if a DST department && it is not currently DST, then we need to offset the time (see comments for subtractAnHour method)
   return (nonDSTDepartments.findIndex(d => d === deptId) === -1 && moment().isDST() === false);
 }
 
