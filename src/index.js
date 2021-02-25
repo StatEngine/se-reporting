@@ -33,7 +33,7 @@ function getNotificationEmailConfigs() {
  * retrieve the custom email configs from the webapp api.
  */
 function getCustomEmailConfigs() {
-  return getEnabledEmailConfigs('/custom-emails');
+  return getEnabledEmailConfigs('/custom-email');
 }
 
 // UTC does not account for DST hence the offset between US Eastern and UTC time changes
