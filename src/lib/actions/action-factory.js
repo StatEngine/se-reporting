@@ -2,10 +2,12 @@ import _ from 'lodash';
 
 import { logger } from '../../config/logger';
 
+import customEmail from './customEmail';
 import emailReport from './emailReport';
 import testAction from './testAction';
 
 const registrations = {
+  CustomEmail: customEmail,
   EmailReport: emailReport,
   TestAction: testAction,
 };
