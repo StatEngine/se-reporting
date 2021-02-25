@@ -6,14 +6,18 @@ import Watcher from '../watcher';
 import timerStore from './timer-store';
 
 function removeTimer(id) {
-  console.log(`REMOVE: ${id}`);
-  timerStore.intervals.forEach((value, key) => {
-    console.log(`Before Remove - TimerId: ${key}`);
-  });
   timerStore.removeInterval(id);
-  timerStore.intervals.forEach((value, key) => {
-    console.log(`After Remove - TimerId: ${key}`);
-  });
+}
+
+function getConfigName(config) {
+  if (config.config_json) {
+    return config.config_json.name;
+  }
+  if (config.name) {
+    return config.name;
+  }
+
+  return 'noName';
 }
 
 export function schedule(id, laterSchedule, actionName, actionOptions) {
@@ -22,7 +26,7 @@ export function schedule(id, laterSchedule, actionName, actionOptions) {
   const watcher = new Watcher(actionName, actionOptions);
   const interval = later.setInterval(watcher.execute.bind(watcher), laterSchedule);
   timerStore.addInterval(id, interval);
-  const name = _.get(actionOptions, 'config_json.name');
+  const name = getConfigName(actionOptions);
   logger.info(`Done scheduling ${name}, next occurence at ${later.schedule(laterSchedule).next(1)}`);
 }
 
