@@ -60,3 +60,5 @@ typings/
 
 /emails/shift/*.ejs
 /emails/assets/*.css
+
+.idea/
