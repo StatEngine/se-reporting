@@ -39,7 +39,7 @@ function getCustomEmailConfigs() {
 // UTC does not account for DST hence the offset between US Eastern and UTC time changes
 // from -5hrs to -4 hrs during DST (approx March-Nov)
 // Hence, if it is not currently DST, then we need to add an hour offset to the schedule
-// since the clock has "fallen back". It is also important to remember that the times/schedules
+// since the clock has "fallen back" and we need to restore it. It is also important to remember that the times/schedules
 // specified in the DB configs assume a DST offset.
 // e.g.
 // Richmond wants emails at approx 8:00 am EST
@@ -48,14 +48,14 @@ function getCustomEmailConfigs() {
 // however if DST is NOT observed then the -5hrs offset kicks-in on Nov 1st
 // and the email would go out at approx 7 am EST, therefore we add an hour
 // to the time to make it go out at 8 am EST as desired.
-function subtractAnHour(sched) {
+function addAnHour(sched) {
   let time = sched.schedules[0].t[0];
   // later uses seconds, not milliseconds
   time += 3600;
   return [time];
 }
 
-function shouldSubtractAnHour(deptId) {
+function shouldAddAnHour(deptId) {
   // array of the departments that do not participate in
   // daylight savings time
   const nonDSTDepartments = [
@@ -79,8 +79,8 @@ function shouldSubtractAnHour(deptId) {
  */
 function getScheduleWithDST(schedText, deptId) {
   const sched = later.parse.text(schedText);
-  if (shouldSubtractAnHour(deptId)) {
-    sched.schedules[0].t = subtractAnHour(sched);
+  if (shouldAddAnHour(deptId)) {
+    sched.schedules[0].t = addAnHour(sched);
   }
   return sched;
 }
