@@ -8,7 +8,8 @@
     "jsx-a11y/href-no-hash": "off",
     "no-unused-expressions": 0,
     "chai-friendly/no-unused-expressions": 2,
-    "no-underscore-dangle": 0
+    "no-underscore-dangle": 0,
+    "max-len": "off"
   },
   "env": {
     "mocha": true

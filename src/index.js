@@ -54,6 +54,18 @@ function isCurrentlyDST() {
   return moment.tz(moment(), 'America/New_York').isDST();
 }
 
+// eslint-disable-next-line import/prefer-default-export
+export function getScheduler(scheduleText, deptId, currentlyDST) {
+  const schdl = later.parse.text(scheduleText);
+
+  // if a DST department && it is not currently DST, then we need to offset the time
+  // (see comments for addAnHour method)
+  if (isDSTDept(deptId) && currentlyDST === false) {
+    schdl.schedules[0].t = addAnHour(schdl);
+  }
+  return schdl;
+}
+
 function scheduleAll() {
   // will need this to check if we should account for Daylight Savings Time
   // when we schedule the email
@@ -65,16 +77,7 @@ function scheduleAll() {
         if (!_.isNil(periodic.enabled) && periodic.enabled === false) return;
         const periodicConfig = periodic.config_json;
         if (_.get(periodicConfig, 'schedulerOptions.later.text')) {
-          const schedText = periodicConfig.schedulerOptions.later.text;
-          const sched = later.parse.text(schedText);
-          const deptId = periodic.fire_department__id;
-
-          // if a DST department && it is not currently DST, then we need to offset the time
-          // (see comments for addAnHour method)
-          if (isDSTDept(deptId) && currentlyDST === false) {
-            sched.schedules[0].t = addAnHour(sched);
-          }
-
+          const sched = getScheduler(periodicConfig.schedulerOptions.later.text, periodic.fire_department__id, currentlyDST);
           schedule(periodic._id, sched, 'EmailReport', periodic);
         }
       });
