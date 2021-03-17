@@ -1,7 +1,7 @@
 import request from 'request-promise';
 import later from 'later';
 import _ from 'lodash';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 import config from './config';
 import { schedule } from './lib/scheduler/scheduler';
@@ -20,8 +20,8 @@ function getEmailReportConfiguration() {
 // UTC does not account for DST hence the offset between US Eastern and UTC time changes
 // from -5hrs to -4 hrs during DST (approx March-Nov)
 // Hence, if it is not currently DST, then we need to add an hour offset to the schedule
-// since the clock has "fallen back". It is also important to remember that the times/schedules specified
-// in the DB configs assume a DST offset.
+// since the clock has "fallen back". It is also important to remember that the times/schedules
+// specified in the DB configs assume a DST offset.
 // e.g.
 // Richmond wants emails at approx 8:00 am EST
 // Their config specifies approx 12:00 pm UTC
@@ -29,14 +29,14 @@ function getEmailReportConfiguration() {
 // however if DST is NOT observed then the -5hrs offset kicks-in on Nov 1st
 // and the email would go out at approx 7 am EST, therefore we add an hour
 // to the time to make it go out at 8 am EST as desired.
-function subtractAnHour(sched) {
+function addAnHour(sched) {
   let time = sched.schedules[0].t[0];
   // later uses seconds, not milliseconds
   time += 3600;
   return [time];
 }
 
-function shouldSubtractAnHour(deptId) {
+function isDSTDept(deptId) {
   // array of the departments that do not participate in
   // daylight savings time
   const nonDSTDepartments = [
@@ -45,40 +45,39 @@ function shouldSubtractAnHour(deptId) {
     '93429', // Rincon Vallye, AZ
     '97477', // Tuscon, AZ
   ];
-
-  // if a DST department && it is not currently DST, then we need to offset the time (see comments for subtractAnHour method)
-  return (nonDSTDepartments.findIndex(d => d === deptId) === -1 && moment().isDST() === false);
+  return nonDSTDepartments.findIndex(d => d === deptId) === -1;
 }
 
-function sendDailyEmail(sendTime) {
-  console.log(`sendDailyEmail : ${sendTime}`);
+function isCurrentlyDST() {
+  // we need to use moment-timezone and set it to a timezone that we know uses DST
+  // this way, we can check the current date and see if it is DST or not
+  return moment.tz(moment(), 'America/New_York').isDST();
+}
 
-  getEmailReportConfiguration()
-    .then((periodics) => {
-      periodics.forEach((periodic) => {
-        if (!_.isNil(periodic.enabled) && periodic.enabled === false) return;
-        const periodicConfig = periodic.config_json;
-        if (_.get(periodicConfig, 'name') === 'Daily') {
-          const sched = later.parse.text(sendTime);
-          schedule(periodic._id, sched, 'EmailReport', periodic);
-        }
-      });
-    });
+// eslint-disable-next-line import/prefer-default-export
+export function getScheduler(scheduleText, deptId, currentlyDST) {
+  const schdl = later.parse.text(scheduleText);
+
+  // if a DST department && it is not currently DST, then we need to offset the time
+  // (see comments for addAnHour method)
+  if (isDSTDept(deptId) && currentlyDST === false) {
+    schdl.schedules[0].t = addAnHour(schdl);
+  }
+  return schdl;
 }
 
 function scheduleAll() {
+  // will need this to check if we should account for Daylight Savings Time
+  // when we schedule the email
+  const currentlyDST = isCurrentlyDST();
+
   getEmailReportConfiguration()
     .then((periodics) => {
       periodics.forEach((periodic) => {
         if (!_.isNil(periodic.enabled) && periodic.enabled === false) return;
         const periodicConfig = periodic.config_json;
         if (_.get(periodicConfig, 'schedulerOptions.later.text')) {
-          const schedText = periodicConfig.schedulerOptions.later.text;
-          const sched = later.parse.text(schedText);
-          const deptId = periodic.fire_department__id;
-          if (shouldSubtractAnHour(deptId)) {
-            sched.schedules[0].t = subtractAnHour(sched);
-          }
+          const sched = getScheduler(periodicConfig.schedulerOptions.later.text, periodic.fire_department__id, currentlyDST);
           schedule(periodic._id, sched, 'EmailReport', periodic);
         }
       });
@@ -107,9 +106,3 @@ const endDstSchedule = later.parse.recur().on(11).month().on(1)
 // we want to reschedule on start and end of DST
 later.setInterval(scheduleAll, startDstSchedule);
 later.setInterval(scheduleAll, endDstSchedule);
-
-// these next two lines are ONLY for resending the daily emails if they don't
-// go out for some reason
-// remember that times are all in UTC
-// const emailSendTime = 'at 4:30 pm';
-// sendDailyEmail(emailSendTime);
