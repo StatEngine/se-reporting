@@ -33,7 +33,7 @@ class EmailReport extends Action {
     requestOptions.method = 'POST';
 
     return request(requestOptions).catch((err) => {
-      console.error('Email Report failed');
+      console.error(`Email Report failed for ${this.options.fire_department__id}`);
       console.dir(err);
     });
   }
