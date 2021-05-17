@@ -81,6 +81,9 @@ function scheduleAll() {
           schedule(periodic._id, sched, 'EmailReport', periodic);
         }
       });
+    }).catch((err) => {
+      console.error('Failure getting Email Report Configuration');
+      console.dir(err);
     });
 }
 

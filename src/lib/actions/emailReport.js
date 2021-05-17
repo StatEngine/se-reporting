@@ -32,7 +32,10 @@ class EmailReport extends Action {
     requestOptions.json = true;
     requestOptions.method = 'POST';
 
-    return request(requestOptions);
+    return request(requestOptions).catch((err) => {
+      console.error('Email Report failed');
+      console.dir(err);
+    });
   }
 }
 
