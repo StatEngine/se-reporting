@@ -32,6 +32,7 @@
     "nodemailer-mandrill-transport": "^1.2.0",
     "npm": "^5.6.0",
     "npm-install-peers": "^1.2.1",
+    "promise-retry": "^2.0.1",
     "request-promise": "^4.2.2",
     "twitter": "^1.7.1",
     "uuid": "^3.1.0"
