@@ -13,7 +13,7 @@ class EmailReport extends Action {
       factor: 3,
       minTimeout: 1000,
       maxTimeout: 1000 * 60 * 5, // 5 minutes
-      randomize: false,
+      randomize: 1.1,
     };
   }
 
@@ -38,18 +38,21 @@ class EmailReport extends Action {
     requestOptions.json = true;
     requestOptions.method = 'POST';
 
-    promiseRetry(this.retryOptions, (retryCallback, attempt) => request(requestOptions).catch((error) => {
+    console.log(`Calling TimeRangeAnalysis API for ${this.options.fire_department__id} fire department id`);
+
+    return promiseRetry(this.retryOptions, (retryCallback, attempt) => request(requestOptions).catch((error) => {
       this.loggError(error, attempt);
       retryCallback(error);
-    })).then(() => {
+    })).then((params) => {
       this.logSuccess();
+      return params;
     }).catch((error) => {
       this.loggError(error);
     });
   }
 
   logSuccess() {
-    console.info(`Calling TimeRangeAnalysis API succeeded for ${this.options.fire_department__id} fire department id`);
+    console.info(`Call to TimeRangeAnalysis API succeeded for ${this.options.fire_department__id} fire department id`);
   }
 
   loggError(number, error) {
