@@ -1,16 +1,22 @@
 import request from 'request-promise';
 import _ from 'lodash';
 import moment from 'moment';
-
+import promiseRetry from 'promise-retry';
 import config from '../../config';
-import { logger } from '../../config/logger';
-
 import Action from './action';
 
 class EmailReport extends Action {
   constructor(options) {
     super(options);
+    this.retryOptions = {
+      retries: 10,
+      factor: 3,
+      minTimeout: 1000,
+      maxTimeout: 1000 * 60 * 5, // 5 minutes
+      randomize: 1.1,
+    };
   }
+
 
   run() {
     console.info('Running EmailReport Action');
@@ -32,10 +38,29 @@ class EmailReport extends Action {
     requestOptions.json = true;
     requestOptions.method = 'POST';
 
-    return request(requestOptions).catch((err) => {
-      console.error(`Email Report failed for ${this.options.fire_department__id}`);
-      console.dir(err);
+    console.log(`Calling TimeRangeAnalysis API for ${this.options.fire_department__id} fire department id`);
+
+    return promiseRetry(this.retryOptions, (retryCallback, attempt) => request(requestOptions).catch((error) => {
+      this.loggError(error, attempt);
+      retryCallback(error);
+    })).then((params) => {
+      this.logSuccess();
+      return params;
+    }).catch((error) => {
+      this.loggError(error);
     });
+  }
+
+  logSuccess() {
+    console.info(`Call to TimeRangeAnalysis API succeeded for ${this.options.fire_department__id} fire department id`);
+  }
+
+  loggError(number, error) {
+    console.error(`Error - Calling TimeRangeAnalysis API failed for ${this.options.fire_department__id} fire department id`);
+    if (number) {
+      console.error(`Error - Call attempt number ${number}`);
+    }
+    console.dir(error);
   }
 }
 
