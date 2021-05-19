@@ -28,7 +28,7 @@
     "lodash": "^4.17.4",
     "moment": "^2.19.3",
     "moment-timezone": "^0.5.14",
-    "nodemailer": "^4.4.1",
+    "nodemailer": "^6.4.16",
     "nodemailer-mandrill-transport": "^1.2.0",
     "npm": "^5.6.0",
     "npm-install-peers": "^1.2.1",
