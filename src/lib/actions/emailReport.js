@@ -38,7 +38,9 @@ class EmailReport extends Action {
     requestOptions.json = true;
     requestOptions.method = 'POST';
 
-    promiseRetry(this.retryOptions, (retryCallback, attempt) => request(requestOptions).catch((error) => {
+    console.log(`Calling TimeRangeAnalysis API for ${this.options.fire_department__id} fire department id`);
+
+    return promiseRetry(this.retryOptions, (retryCallback, attempt) => request(requestOptions).catch((error) => {
       this.loggError(error, attempt);
       retryCallback(error);
     })).then(() => {
@@ -49,7 +51,7 @@ class EmailReport extends Action {
   }
 
   logSuccess() {
-    console.info(`Calling TimeRangeAnalysis API succeeded for ${this.options.fire_department__id} fire department id`);
+    console.info(`Call to TimeRangeAnalysis API succeeded for ${this.options.fire_department__id} fire department id`);
   }
 
   loggError(number, error) {
